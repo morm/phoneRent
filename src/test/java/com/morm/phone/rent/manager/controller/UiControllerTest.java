@@ -1,5 +1,11 @@
 package com.morm.phone.rent.manager.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import com.morm.phone.rent.manager.controller.web.UiController;
 import com.morm.phone.rent.manager.domain.Employee;
 import com.morm.phone.rent.manager.dto.request.LoginRequest;
@@ -10,7 +16,6 @@ import com.morm.phone.rent.manager.service.JwtUserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -22,35 +27,22 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class UiControllerTest {
 
+  private final ModelMapper modelMapper = new ModelMapper();
   @Mock
   private JwtUserService jwtUserService;
-
   @Mock
   private AuthenticationManager authenticationManager;
-
   @Mock
   private JwtTokenUtil jwtUtil;
-
   @Mock
   private PasswordEncoder encoder;
-
   @InjectMocks
   private UiController uiController;
-
-  private final ModelMapper modelMapper = new ModelMapper();
 
   @Test
   void testSuccessfulRegistration() {
@@ -80,6 +72,7 @@ class UiControllerTest {
     assertEquals(jwt, response.getToken());
     verify(jwtUserService, Mockito.atMostOnce()).save(employee);
   }
+
   @Test
   void testRegistrationFailure() {
     // Given

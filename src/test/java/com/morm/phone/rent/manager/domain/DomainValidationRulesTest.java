@@ -28,20 +28,24 @@ public class DomainValidationRulesTest {
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     validator = factory.getValidator();
   }
+
   @Test
   void testCreateEmployeeWithBlankUsername() {
     Employee employee = EntityHelper.createEmployee("");
     Set<ConstraintViolation<Employee>> violations = validator.validate(employee);
     assertEquals(1, violations.size());
-    assertTrue(violations.stream().anyMatch(violation -> violation.getPropertyPath().toString().equals("username")));
+    assertTrue(violations.stream()
+        .anyMatch(violation -> violation.getPropertyPath().toString().equals("username")));
   }
 
   @Test
   void testCreateEmployeeWithLongUsername() {
-    Employee employee = EntityHelper.createEmployee("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+    Employee employee = EntityHelper.createEmployee(
+        "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
     Set<ConstraintViolation<Employee>> violations = validator.validate(employee);
     assertEquals(1, violations.size());
-    assertTrue(violations.stream().anyMatch(violation -> violation.getPropertyPath().toString().equals("username")));
+    assertTrue(violations.stream()
+        .anyMatch(violation -> violation.getPropertyPath().toString().equals("username")));
   }
 
   @Test
@@ -50,16 +54,19 @@ public class DomainValidationRulesTest {
     employee.setFirstName("");
     Set<ConstraintViolation<Employee>> violations = validator.validate(employee);
     assertEquals(1, violations.size());
-    assertTrue(violations.stream().anyMatch(violation -> violation.getPropertyPath().toString().equals("firstName")));
+    assertTrue(violations.stream()
+        .anyMatch(violation -> violation.getPropertyPath().toString().equals("firstName")));
   }
 
   @Test
   void testCreateEmployeeWithLongFirstName() {
     Employee employee = EntityHelper.createEmployee("testuser");
-    employee.setFirstName("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+    employee.setFirstName(
+        "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
     Set<ConstraintViolation<Employee>> violations = validator.validate(employee);
     assertEquals(1, violations.size());
-    assertTrue(violations.stream().anyMatch(violation -> violation.getPropertyPath().toString().equals("firstName")));
+    assertTrue(violations.stream()
+        .anyMatch(violation -> violation.getPropertyPath().toString().equals("firstName")));
   }
 
   @Test
@@ -68,16 +75,19 @@ public class DomainValidationRulesTest {
     employee.setLastName("");
     Set<ConstraintViolation<Employee>> violations = validator.validate(employee);
     assertEquals(1, violations.size());
-    assertTrue(violations.stream().anyMatch(violation -> violation.getPropertyPath().toString().equals("lastName")));
+    assertTrue(violations.stream()
+        .anyMatch(violation -> violation.getPropertyPath().toString().equals("lastName")));
   }
 
   @Test
   void testCreateEmployeeWithLongLastName() {
     Employee employee = EntityHelper.createEmployee("testuser");
-    employee.setLastName("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+    employee.setLastName(
+        "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
     Set<ConstraintViolation<Employee>> violations = validator.validate(employee);
     assertEquals(1, violations.size());
-    assertTrue(violations.stream().anyMatch(violation -> violation.getPropertyPath().toString().equals("lastName")));
+    assertTrue(violations.stream()
+        .anyMatch(violation -> violation.getPropertyPath().toString().equals("lastName")));
   }
 
 }

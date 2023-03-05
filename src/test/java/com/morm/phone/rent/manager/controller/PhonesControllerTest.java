@@ -1,11 +1,13 @@
 package com.morm.phone.rent.manager.controller;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import com.morm.phone.rent.manager.controller.rest.PhonesController;
 import com.morm.phone.rent.manager.dto.response.PhonesRentResponse;
 import com.morm.phone.rent.manager.service.PhonesRentService;
+import java.security.Principal;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,15 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.security.Principal;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(MockitoExtension.class)
 public class PhonesControllerTest {
@@ -40,7 +35,8 @@ public class PhonesControllerTest {
     // Given
     MockHttpServletRequest request = new MockHttpServletRequest();
     MockHttpServletResponse response = new MockHttpServletResponse();
-    UserDetails userDetails = User.withUsername("testuser").password("password").roles("USER").build();
+    UserDetails userDetails = User.withUsername("testuser").password("password").roles("USER")
+        .build();
     Principal principal = new UsernamePasswordAuthenticationToken(userDetails, "password");
 
     when(phonesRentService.getRentedPhones()).thenReturn(Collections.emptyList());
@@ -59,7 +55,8 @@ public class PhonesControllerTest {
     // Given
     MockHttpServletRequest request = new MockHttpServletRequest();
     MockHttpServletResponse response = new MockHttpServletResponse();
-    UserDetails userDetails = User.withUsername("testuser").password("password").roles("USER").build();
+    UserDetails userDetails = User.withUsername("testuser").password("password").roles("USER")
+        .build();
     Principal principal = new UsernamePasswordAuthenticationToken(userDetails, "password");
 
     // When

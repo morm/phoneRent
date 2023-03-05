@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration(classes = {DaoConfig.class})
 @Transactional("transactionManager")
 public class UserRepositoryTest {
+
   @Autowired
   private UserRepository userRepository;
 
