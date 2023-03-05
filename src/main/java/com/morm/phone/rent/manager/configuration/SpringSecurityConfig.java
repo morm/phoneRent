@@ -31,10 +31,12 @@ public class SpringSecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.cors().and().csrf().disable()
         .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and() // will store token in localStorage
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and() // will store token in localStorage
         .authorizeRequests()
         .antMatchers("/**").permitAll() // all pages are available
-        .antMatchers("/api/**").authenticated(); // authentication token passed to all api calls and checked
+        .antMatchers("/api/**")
+        .authenticated(); // authentication token passed to all api calls and checked
 
     http.authenticationProvider(authenticationProvider());
 

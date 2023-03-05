@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Phone List</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6 mt-5">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="text-center">Phone List</h3>
+        </div>
+        <div class="card-body">
+          <ul class="list-group" id="phoneList">
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+              </thead>
+              <tbody id="phoneTableBody">
+              </tbody>
+            </table>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('Please log in');
+        window.location.href = "/login";
+    } else {
+        fetch('/api/rented_phones', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const tableBody = document.getElementById('phoneTableBody');
+            tableBody.innerHTML = '';
+            data.phonesRent.forEach(phone => {
+                const row = tableBody.insertRow();
+                const nameCell = row.insertCell();
+                const statusCell = row.insertCell();
+                const reserveCell = row.insertCell();
+                nameCell.innerText = phone.phoneName;
+                if (phone.isAvailable) {
+                    statusCell.innerHTML = '<span class="badge badge-success">Available</span>';
+                    const reserveButton = document.createElement('button');
+                    reserveButton.classList.add('btn', 'btn-danger');
+                    reserveButton.innerText = 'Reserve';
+                    reserveButton.addEventListener('click', () => {
+                        reservePhone(phone.phoneId);
+                    });
+                    reserveCell.appendChild(reserveButton);
+                } else {
+                    statusCell.innerHTML = '<span class="badge badge-danger">Booked</span><br><small>by ' + phone.employeeName + ' at ' + new Date(phone.bookedAt).toLocaleString() + '</small>';
+                    const releaseButton = document.createElement('button');
+                    releaseButton.classList.add('btn', 'btn-primary');
+                    releaseButton.innerText = 'Return';
+                    if(phone.isEditable) {
+                      releaseButton.addEventListener('click', () => {
+                          releasePhone(phone.phoneId);
+                      });
+                    } else {
+                      releaseButton.disabled = true;
+                    }
+                    reserveCell.appendChild(releaseButton);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching phone list:', error);
+            alert('Error fetching phone list');
+        });
+    }
+
+    function reservePhone(phoneId) {
+        fetch('/api/rented_phones/' + phoneId + '?book=true', {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(response.status);
+            }
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error reserving phone:', error);
+            alert('Error reserving phone');
+        });
+    }
+
+    function releasePhone(phoneId) {
+        fetch('/api/rented_phones/' + phoneId + '?book=false', {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(response.status);
+            }
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error releasing phone:', error);
+            alert('Error releasing phone');
+        });
+    }
+
+</script>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>

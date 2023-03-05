@@ -21,6 +21,7 @@ public class JwtUserService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
     return userRepository.findByUsername(username)
         .map(user -> new User(user.getUsername(), user.getPassword(),
             Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))))

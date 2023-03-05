@@ -15,11 +15,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -36,6 +34,7 @@ public class UiController {
       JwtUserService jwtUserService,
       JwtTokenUtil jwtUtil,
       PasswordEncoder encoder) {
+
     this.jwtUserService = jwtUserService;
     this.jwtUtil = jwtUtil;
     this.authenticationManager = authenticationManager;
@@ -62,6 +61,7 @@ public class UiController {
   @PostMapping("/login")
   @ResponseBody
   public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+
     Authentication authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
             loginRequest.getPassword()));
@@ -75,6 +75,7 @@ public class UiController {
   @PostMapping("/register")
   @ResponseBody
   public ResponseEntity<?> register(@RequestBody SignupRequest signUpRequest) {
+
     if (jwtUserService.existsByUsername(signUpRequest.getUsername())) {
       return ResponseEntity
           .badRequest()

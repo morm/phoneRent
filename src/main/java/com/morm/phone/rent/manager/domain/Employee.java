@@ -9,7 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -51,4 +50,7 @@ public class Employee {
   @NotEmpty(message = "Last name must not be blank")
   @Size(max = 45, message = "Last name cannot be longer than 100 characters")
   private String lastName;
+
+  @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+  private Set<PhoneRent> phoneRents;
 }
