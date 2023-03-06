@@ -1,0 +1,43 @@
+@startuml
+
+class SpringSecurityConfig {
+	{field} ~userDetailsService : org.springframework.security.core.userdetails.UserDetailsService
+	{method} +authenticationJwtTokenFilter () : AuthTokenFilter
+	{method} +authenticationManager ( authConfig : org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration ) : org.springframework.security.authentication.AuthenticationManager
+	{method} +authenticationProvider () : org.springframework.security.authentication.dao.DaoAuthenticationProvider
+	{method} +passwordEncoder () : org.springframework.security.crypto.password.PasswordEncoder
+	{method} +securityFilterChain ( http : org.springframework.security.config.annotation.web.builders.HttpSecurity ) : org.springframework.security.web.SecurityFilterChain
+}
+
+class AuthTokenFilter {
+	{field} {static} -BEARER_HEADER : String
+	{field} {static} -logger : org.slf4j.Logger
+	{field} -userDetailsService : org.springframework.security.core.userdetails.UserDetailsService
+	{method} #doFilterInternal ( request : javax.servlet.http.HttpServletRequest , response : javax.servlet.http.HttpServletResponse , filterChain : javax.servlet.FilterChain ) : void
+	{method} -parseJwt ( request : javax.servlet.http.HttpServletRequest ) : String
+}
+
+class AuthEntryPointJwt {
+	{field} {static} -logger : org.slf4j.Logger
+	{method} +commence ( request : javax.servlet.http.HttpServletRequest , response : javax.servlet.http.HttpServletResponse , authException : org.springframework.security.core.AuthenticationException ) : void
+}
+
+class JwtTokenUtil {
+	{field} ~expiration : Integer
+	{field} {static} -logger : org.slf4j.Logger
+	{field} -secret : String
+	{field} {static} -serialVersionUID : long
+	{method} +generateJwtToken ( authentication : org.springframework.security.core.Authentication ) : String
+	{method} -getAllClaimsFromToken ( token : String ) : io.jsonwebtoken.Claims
+	{method} +getClaimFromToken ( token : String , claimsResolver : java.util.function.Function ) : Object
+	{method} +getExpirationDateFromToken ( token : String ) : java.util.Date
+	{method} +getUsernameFromToken ( token : String ) : String
+	{method} -isTokenExpired ( token : String ) : Boolean
+	{method} +validateToken ( token : String ) : Boolean
+}
+
+SpringSecurityConfig -->  AuthEntryPointJwt : unauthorizedHandler
+AuthTokenFilter -->  JwtTokenUtil : jwtUtils
+
+
+@enduml

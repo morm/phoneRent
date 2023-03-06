@@ -11,46 +11,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PhonesRentService {
+public interface PhonesRentService {
 
-  private final PhoneRentRepository phoneRentRepository;
+  public List<PhoneRent> getRentedPhones();
 
-  private final UserRepository userRepository;
+  public void releasePhone(String name, Integer phoneId);
 
-  public PhonesRentService(PhoneRentRepository phoneRentRepository, UserRepository userRepository) {
-    this.phoneRentRepository = phoneRentRepository;
-    this.userRepository = userRepository;
-  }
-
-
-  public List<PhoneRent> getRentedPhones() {
-    return phoneRentRepository.findAllWithCurrentState();
-  }
-
-  public void releasePhone(String name, Integer phoneId) {
-    // Check if phone is rented by user, or else throw exception
-    phoneRentRepository.findRentedPhoneByUser(name, phoneId).ifPresentOrElse(phoneRent -> {
-      phoneRent.setReleasedAt(LocalDateTime.now());
-      phoneRentRepository.save(phoneRent);
-    }, () -> {
-      throw new PhoneNotRentedException(name, phoneId);
-    });
-  }
-
-  public void bookPhone(String name, Integer phoneId) {
-    // Check if phone is available, or else throw exception
-    phoneRentRepository.findRentedPhoneByUser(name, phoneId).ifPresentOrElse(phoneRent -> {
-      throw new PhoneNotRentedException(name, phoneId);
-    }, () -> {
-      PhoneRent phoneForRent = new PhoneRent();
-      phoneForRent.setPhone(new Phone(phoneId));
-      userRepository.findByUsername(name).ifPresentOrElse(employee -> {
-        phoneForRent.setEmployee(employee);
-        phoneForRent.setBookedAt(LocalDateTime.now());
-        phoneRentRepository.save(phoneForRent);
-      }, () -> {
-        throw new EmployeeNotFound(name);
-      });
-    });
-  }
+  public void bookPhone(String name, Integer phoneId);
 }

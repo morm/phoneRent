@@ -11,29 +11,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class JwtUserService implements UserDetailsService {
+public interface JwtUserService extends UserDetailsService {
 
-  private final UserRepository userRepository;
 
-  public JwtUserService(UserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
+  public void save(Employee user);
 
-  @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-    return userRepository.findByUsername(username)
-        .map(user -> new User(user.getUsername(), user.getPassword(),
-            Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))))
-        .orElseThrow(
-            () -> new UsernameNotFoundException("User not found with username: " + username));
-  }
-
-  public void save(Employee user) {
-    userRepository.save(user);
-  }
-
-  public boolean existsByUsername(String username) {
-    return userRepository.existsByUsername(username);
-  }
+  public boolean existsByUsername(String username);
 }

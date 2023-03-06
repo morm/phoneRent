@@ -1,0 +1,122 @@
+@startuml
+
+
+class PhonesController {
+	{field} {static} -logger : org.slf4j.Logger
+	{method} +getRentedPhones ( principal : java.security.Principal ) : PhonesRentResponse
+	{method} +handleException ( paramException : Exception ) : org.springframework.http.ResponseEntity
+	{method} +releasePhone ( book : Boolean , principal : java.security.Principal , phoneId : Integer ) : org.springframework.http.ResponseEntity
+}
+
+
+class UiController {
+	{field} -authenticationManager : org.springframework.security.authentication.AuthenticationManager
+	{field} -encoder : org.springframework.security.crypto.password.PasswordEncoder
+	{field} -modelMapper : org.modelmapper.ModelMapper
+	{method} +index () : String
+	{method} +login () : String
+	{method} +login ( loginRequest : LoginRequest ) : JwtResponse
+	{method} +register () : String
+	{method} +register ( signUpRequest : SignupRequest ) : JwtResponse
+}
+
+
+class Employee {
+	{field} +firstName : String
+	{field} +id : Integer
+	{field} +lastName : String
+	{field} +password : String
+	{field} +username : String
+	{method} +toString () : String
+}
+
+
+class Phone {
+	{field} +id : Integer
+	{field} +name : String
+}
+
+
+class PhoneRent {
+	{field} +bookedAt : java.time.LocalDateTime
+	{field} +isAvailable : Boolean
+	{field} +releasedAt : java.time.LocalDateTime
+	{method} #canEqual ( paramObject1 : Object ) : boolean
+	{method} +equals ( paramObject1 : Object ) : boolean
+	{method} +hashCode () : int
+}
+
+
+class PhoneRentId {
+	{field} +employee : Integer
+	{field} +phone : Integer
+	{method} #canEqual ( paramObject1 : Object ) : boolean
+	{method} +equals ( paramObject1 : Object ) : boolean
+	{method} +hashCode () : int
+}
+
+
+class PhoneRentItem {
+	{field} +bookedAt : java.time.LocalDateTime
+	{field} +employeeId : Integer
+	{field} +employeeName : String
+	{field} +isAvailable : Boolean
+	{field} +isEditable : Boolean
+	{field} +phoneId : Integer
+	{field} +phoneName : String
+}
+
+
+interface PhoneRentRepository {
+	{method}  {abstract} +findAllWithCurrentState () : java.util.List
+	{method}  {abstract} +findRentedPhoneByUser ( username : String , phoneId : Integer ) : java.util.Optional
+}
+
+
+interface UserRepository {
+	{method}  {abstract} +existsByUsername ( username : String ) : Boolean
+	{method}  {abstract} +findByUsername ( username : String ) : java.util.Optional
+}
+
+
+interface JwtUserService {
+	{method}  {abstract} +existsByUsername ( username : String ) : boolean
+	{method}  {abstract} +save ( user : cdomain.Employee ) : void
+}
+
+
+class JwtUserServiceImpl {
+	{method} +existsByUsername ( username : String ) : boolean
+	{method} +loadUserByUsername ( username : String ) : org.springframework.security.core.userdetails.UserDetails
+	{method} +save ( user : cdomain.Employee ) : void
+}
+
+
+interface PhonesRentService {
+	{method}  {abstract} +bookPhone ( name : String , phoneId : Integer ) : void
+	{method}  {abstract} +getRentedPhones () : java.util.List
+	{method}  {abstract} +releasePhone ( name : String , phoneId : Integer ) : void
+}
+
+
+class PhonesRentServiceImpl {
+	{method} +bookPhone ( name : String , phoneId : Integer ) : void
+	{method} +getRentedPhones () : java.util.List
+	{method} +releasePhone ( name : String , phoneId : Integer ) : void
+}
+
+PhonesController -->  PhonesRentService : phonesRentService
+UiController -->  JwtTokenUtil : jwtUtil
+UiController -->  JwtUserService : jwtUserService
+Employee "1" o-- "0..*"  PhoneRent : phoneRents
+Phone "1" o-- "0..*"  PhoneRent : phoneRents
+PhoneRent -->  Employee : employee
+PhoneRent -->  Phone : phone
+PhonesRentResponse "1" o-- "0..*"  PhoneRentItem : phonesRent
+JwtUserServiceImpl -->  UserRepository : userRepository
+JwtUserServiceImpl ..|>  JwtUserService
+PhonesRentServiceImpl -->  PhoneRentRepository : phoneRentRepository
+PhonesRentServiceImpl -->  UserRepository : userRepository
+PhonesRentServiceImpl ..|>  PhonesRentService
+
+@enduml

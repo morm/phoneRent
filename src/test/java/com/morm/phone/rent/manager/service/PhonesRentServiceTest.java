@@ -38,7 +38,7 @@ class PhonesRentServiceTest {
 
   @BeforeEach
   void setUp() {
-    phonesRentService = new PhonesRentService(phoneRentRepository, userRepository);
+    phonesRentService = new PhonesRentServiceImpl(phoneRentRepository, userRepository);
   }
 
   @Test

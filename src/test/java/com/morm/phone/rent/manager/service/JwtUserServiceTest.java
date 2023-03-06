@@ -27,7 +27,7 @@ public class JwtUserServiceTest {
   private UserRepository userRepository;
 
   @InjectMocks
-  private JwtUserService jwtUserService;
+  private JwtUserServiceImpl jwtUserService;
 
   private Employee testUser;
 
