@@ -1,5 +1,7 @@
 package com.morm.phone.rent.manager.filter;
 
+import static java.util.Optional.ofNullable;
+
 import com.morm.phone.rent.manager.security.JwtTokenUtil;
 import java.io.IOException;
 import javax.servlet.FilterChain;
@@ -9,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,20 +24,21 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   private static final String BEARER_HEADER = "Bearer ";
   private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
-  @Autowired
   private JwtTokenUtil jwtUtils;
-  @Autowired
   private UserDetailsService userDetailsService;
 
+  public AuthTokenFilter(JwtTokenUtil jwtUtils, UserDetailsService userDetailsService) {
+    this.jwtUtils = jwtUtils;
+    this.userDetailsService = userDetailsService;
+  }
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
     try {
-      String jwt = parseJwt(request);
-
       // validate token and set user authentication
-      if (jwt != null && jwtUtils.validateToken(jwt)) {
+      ofNullable(parseJwt(request)).ifPresent(jwt -> {
+        jwtUtils.validateToken(jwt);
         String username = jwtUtils.getUsernameFromToken(jwt);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -46,9 +50,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-      }
+      });
     } catch (Exception e) {
       logger.error("Cannot set user authentication: {}", e);
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The token is invalid.");
+      return;
     }
 
     filterChain.doFilter(request, response);

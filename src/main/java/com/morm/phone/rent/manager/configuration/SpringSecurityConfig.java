@@ -2,11 +2,11 @@ package com.morm.phone.rent.manager.configuration;
 
 import com.morm.phone.rent.manager.filter.AuthTokenFilter;
 import com.morm.phone.rent.manager.security.AuthEntryPointJwt;
+import com.morm.phone.rent.manager.security.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,11 +22,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SpringSecurityConfig {
 
   @Autowired
-  UserDetailsService userDetailsService;
-
-  @Autowired
   private AuthEntryPointJwt unauthorizedHandler;
-
+  @Autowired
+  private JwtTokenUtil jwtUtils;
+  @Autowired
+  private UserDetailsService userDetailsService;
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.cors().and().csrf().disable()
@@ -34,11 +34,8 @@ public class SpringSecurityConfig {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and() // will store token in localStorage
         .authorizeRequests()
-        .antMatchers("/**").permitAll() // all pages are available
-        .antMatchers("/api/**")
-        .authenticated(); // authentication token passed to all api calls and checked
-
-    http.authenticationProvider(authenticationProvider());
+        .antMatchers("/api/**").fullyAuthenticated() // authentication token passed to all api calls and checked
+        .antMatchers("/**").permitAll(); // all html pages are available without authentication
 
     http.addFilterBefore(authenticationJwtTokenFilter(),
         UsernamePasswordAuthenticationFilter.class);
@@ -48,17 +45,7 @@ public class SpringSecurityConfig {
 
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
-    return new AuthTokenFilter();
-  }
-
-  @Bean
-  public DaoAuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(); // store users in DB
-
-    authProvider.setUserDetailsService(userDetailsService);
-    authProvider.setPasswordEncoder(passwordEncoder());
-
-    return authProvider;
+    return new AuthTokenFilter(jwtUtils, userDetailsService);
   }
 
   @Bean

@@ -2,6 +2,7 @@ package com.morm.phone.rent.manager.controller.rest;
 
 import com.morm.phone.rent.manager.dto.PhoneRentItem;
 import com.morm.phone.rent.manager.dto.response.PhonesRentResponse;
+import com.morm.phone.rent.manager.exception.PhoneNotRentedException;
 import com.morm.phone.rent.manager.service.PhonesRentService;
 import java.security.Principal;
 import java.util.Optional;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class PhonesController {
 
-  private static Logger logger = LoggerFactory.getLogger(PhonesController.class);
+  private static final Logger logger = LoggerFactory.getLogger(PhonesController.class);
   private final PhonesRentService phonesRentService;
 
   public PhonesController(PhonesRentService phonesRentService) {
@@ -34,16 +35,20 @@ public class PhonesController {
   public ResponseEntity<PhonesRentResponse> getRentedPhones(Principal principal) {
 
     PhonesRentResponse res = new PhonesRentResponse();
-    res.setPhonesRent(phonesRentService.getRentedPhones().stream().map(phoneRent -> {
-      PhoneRentItem item = new PhoneRentItem();
-      Optional.ofNullable(phoneRent.getPhone()).ifPresent(phone -> {
-        item.setPhoneId(phone.getId());
-        item.setPhoneName(phone.getName());
-      });
-      Optional.ofNullable(phoneRent.getEmployee()).ifPresent(employee -> {
+    res.setPhonesRent(phonesRentService.getRentedPhones().stream()
+        .map(phoneRent -> {
+          PhoneRentItem item = new PhoneRentItem();
+          Optional.ofNullable(phoneRent.getPhone()).ifPresent(phone -> {
+            item.setPhoneId(phone.getId());
+            item.setPhoneName(phone.getName());
+          });
+
+    Optional.ofNullable(phoneRent.getEmployee())
+      .ifPresent(employee -> {
         item.setEmployeeId(employee.getId());
         item.setEmployeeName(employee.getFirstName() + " " + employee.getLastName());
-        item.setIsEditable(phoneRent.getEmployee().getUsername().equals(principal.getName()));
+        // We allow to edit only if the phone is booked by the current user
+        item.setIsEditable(principal.getName().equals(employee.getUsername()));
       });
 
       item.setBookedAt(phoneRent.getBookedAt());
@@ -51,6 +56,7 @@ public class PhonesController {
 
       return item;
     }).collect(Collectors.toList()));
+
     return ResponseEntity.ok(res);
   }
 
@@ -59,10 +65,15 @@ public class PhonesController {
   public ResponseEntity<?> releasePhone(@RequestParam Boolean book, Principal principal,
       @PathVariable Integer phoneId) {
 
-    if (Boolean.TRUE.equals(book)) {
-      phonesRentService.bookPhone(principal.getName(), phoneId);
-    } else {
-      phonesRentService.releasePhone(principal.getName(), phoneId);
+    try {
+      if (Boolean.TRUE.equals(book)) {
+        phonesRentService.bookPhone(principal.getName(), phoneId);
+      } else {
+        phonesRentService.releasePhone(principal.getName(), phoneId);
+      }
+    } catch (PhoneNotRentedException e) {
+      logger.error("PhonesController error: tried to act on phone rented by another user", e);
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
     return ResponseEntity.ok().build();
   }

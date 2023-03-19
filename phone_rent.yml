@@ -1,24 +1,24 @@
 version: '3.7'
 services:
   phonerent:
+    container_name: phonerent
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8000:8080"
     environment:
-      - DATABASE_URL=jdbc:mysql://mysql:3306/rent_phones?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      - DATABASE_URL=jdbc:mysql://prmysql:3306/rent_phones?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       - DATABASE_USER=root
       - DATABASE_PASSWORD=password
       - SPRING_PROFILES_ACTIVE=prod
+      - MYSQL_ROOT_HOST="%"
     depends_on:
       - mysql
     restart: on-failure
   mysql:
     image: mysql:8
-    container_name: mysql
-    ports:
-      - "3306:3306"
+    container_name: prmysql
     environment:
       - MYSQL_ROOT_PASSWORD=password
       - MYSQL_DATABASE=rent_phones
